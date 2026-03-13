@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import "../../src/Style/FilterSection.css";
+import { API_BASE_URL } from "../config";
 
 const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChange }) => {
 
@@ -30,7 +31,7 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
 
   // LOAD PROJECT LIST FOR NAME MATCH
   useEffect(() => {
-    fetch("https://mrv-backend-13977221722.asia-south1.run.app/api/projects")
+    fetch(`${API_BASE_URL}/api/projects`)
       .then((res) => res.json())
       .then((data) => {
         setProjects(data.filter(p => p.project_id !== 'F4F'));
@@ -65,7 +66,7 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
 
   // LOAD FARMERS LIST
   useEffect(() => {
-    let url = "https://mrv-backend-13977221722.asia-south1.run.app/api/farmers";
+    let url = `${API_BASE_URL}/api/farmers`;
 
     fetch(url)
       .then((res) => res.json())
@@ -107,7 +108,7 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
       if (value !== "All") query.append(key, value);
     });
 
-    const url = `https://mrv-backend-13977221722.asia-south1.run.app/api/farmers/total-area?${query.toString()}`;
+    const url = `${API_BASE_URL}/api/farmers/total-area?${query.toString()}`;
 
     setTotalsLoading(true);
     setTotalsError("");

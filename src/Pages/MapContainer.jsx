@@ -357,7 +357,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
     });
 
     if (activeDroneTileUrl) {
-      const tileUrl = activeDroneTileUrl.startsWith("http") ? activeDroneTileUrl : `http://localhost:5002${activeDroneTileUrl}`;
+      const tileUrl = activeDroneTileUrl.startsWith("http") ? activeDroneTileUrl : `${API_BASE_URL}${activeDroneTileUrl}`;
 
       const droneLayer = L.tileLayer(tileUrl, {
         maxZoom: 22,

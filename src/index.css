@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
+/* =============================================
+   GLOBAL RESET & BASE
+============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #fff;
+  color: #0D1F13;
+  /* Sleek modern Tech Arrow cursor */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M4 4l16 7-7 2 3 7-2 2-3-7-6 5z' fill='%231A5C2D' stroke='%23FFFFFF' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 4 4, auto;
+}
+
+/* Interactive elements: pointer cursor (GIS / Drone Target Crosshair) */
+a, button, [role="button"], input[type="submit"], select, label[for], .clickable-parcel {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none' stroke='%23F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='14' cy='14' r='5' fill='%23F59E0B' fill-opacity='0.2'/%3E%3Cpath d='M14 2v6M14 20v6M2 14h6M20 14h6'/%3E%3C/svg%3E") 14 14, pointer;
+}
+
+/* =============================================
+   CUSTOM SCROLLBAR
+============================================= */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F0FBF4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A8EDBE;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3DB968;
+}
+
+/* =============================================
+   SELECTION COLOR
+============================================= */
+::selection {
+  background: #A8EDBE;
+  color: #0D1F13;
+}
+
+/* =============================================
+   APP CONTAINER
+============================================= */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
+}

@@ -1,0 +1,46 @@
+{
+  "name": "fcfproject",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "npx serve -s dist -l 8080"
+  },
+  "dependencies": {
+    "@tmcw/togeojson": "^7.1.2",
+    "@xmldom/xmldom": "^0.9.8",
+    "firebase": "^12.5.0",
+    "framer-motion": "^12.23.22",
+    "leaflet": "^1.9.4",
+    "leaflet-omnivore": "^0.3.4",
+    "leaflet.markercluster": "^1.5.3",
+    "motion": "^12.23.21",
+    "motion-dom": "^12.23.21",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.7.1",
+    "react-scripts": "^5.0.1",
+    "serve": "^14.2.5",
+    "styled-components": "^6.1.19",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitejs/plugin-react-refresh": "^1.3.6",
+    "@vitejs/plugin-react-swc": "^3.10.2",
+    "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "vite": "^7.1.9"
+  }
+}

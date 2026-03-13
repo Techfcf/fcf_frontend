@@ -1,0 +1,7 @@
+runtime: nodejs20
+app: .
+build:
+  command: npm run build
+  dir: dist
+run:
+  command: npx serve -s dist -l ${PORT}

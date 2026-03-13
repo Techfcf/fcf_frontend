@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Drone Tile Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .status {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .loading {
+            color: orange;
+        }
+
+        .instruction {
+            color: blue;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="info">
+        <h3>Drone Map Test</h3>
+        <div id="status" class="status instruction">Loading Parcels...</div>
+        <div id="details"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        const map = L.map('map').setView([20.9, 85.5], 11); // Initial view Dhenkanal
+        L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 22,
+            attribution: 'Google Satellite'
+        }).addTo(map);
+
+        let activeDroneLayer = null;
+
+        const log = (msg, type = 'normal') => {
+            console.log(msg);
+            const details = document.getElementById('details');
+            const color = type === 'error' ? 'red' : (type === 'success' ? 'green' : 'black');
+            details.innerHTML = `<div style="color:${color}; margin-top:5px;">${msg}</div>` + details.innerHTML;
+        };
+
+        const updateStatus = (msg, cls) => {
+            const el = document.getElementById('status');
+            el.innerText = msg;
+            el.className = `status ${cls}`;
+        };
+
+        const BACKEND = 'http://localhost:5002';
+
+        // FUNCTION TO LOAD DRONE TILE FOR A PARCEL
+        async function loadDroneLayer(tileUrl) {
+            try {
+                updateStatus('Fetching Metadata...', 'loading');
+
+                // Derive XML URL from tile URL
+                // e.g. .../folder/{z}/{x}/{y}.png -> .../folder/tilemapresource.xml
+                let xmlUrl = tileUrl.replace(/\/\{z\}\/\{x\}\/\{y\}\.png$/, '/tilemapresource.xml');
+
+                // Ensure backend proxy prefix if needed (for CORS or path routing)
+                // But tileUrl from DB is already full path /api/tiles/...
+                // Prepend Backend host if relative
+                if (!xmlUrl.startsWith('http')) {
+                    xmlUrl = BACKEND + xmlUrl;
+                }
+                if (!tileUrl.startsWith('http')) {
+                    tileUrl = BACKEND + tileUrl;
+                }
+
+                log(`🔍 Reading XML: ${xmlUrl}`);
+                const response = await fetch(xmlUrl);
+                if (!response.ok) throw new Error(`XML Fetch 404: Tiles might ideally exist but XML missing?`);
+
+                const text = await response.text();
+
+                // Parse for Zoom
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+
+                let minZoom = 12, maxZoom = 22;
+                const tileSets = xmlDoc.getElementsByTagName("TileSet");
+                if (tileSets.length > 0) {
+                    const zooms = [];
+                    for (let i = 0; i < tileSets.length; i++) {
+                        zooms.push(parseInt(tileSets[i].getAttribute("order")));
+                    }
+                    minZoom = Math.min(...zooms);
+                    maxZoom = Math.max(...zooms);
+                }
+                // Clamp minZoom to 12
+                if (minZoom < 12) minZoom = 12;
+
+                log(`✅ Config: Zoom ${minZoom}-${maxZoom}, TMS=True`, 'success');
+
+                // Remove existing
+                if (activeDroneLayer) {
+                    map.removeLayer(activeDroneLayer);
+                }
+
+                // ADD LAYER
+                activeDroneLayer = L.tileLayer(tileUrl, {
+                    minZoom: minZoom,
+                    maxZoom: maxZoom,
+                    tms: true, // Critical
+                    opacity: 1
+                }).addTo(map);
+
+                updateStatus('Drone Imagery Active', 'success');
+                log('🛰️ Layer Added to Map!', 'success');
+
+            } catch (err) {
+                log(err.message, 'error');
+                updateStatus('Failed to load drone', 'error');
+            }
+        }
+
+        // MAIN INIT
+        async function init() {
+            // Fetch Parcels
+            const parcelsUrl = `${BACKEND}/api/farmers-with-land?project_code=NbS-003`;
+            try {
+                const pRes = await fetch(parcelsUrl);
+                const geojson = await pRes.json();
+
+                if (geojson && geojson.features) {
+                    // FILTER: Only show parcels with drone data
+                    let droneFeatures = geojson.features.filter(f =>
+                        (f.properties.drone_survey === 'Yes' && f.properties.farmer_name) ||
+                        (f.properties.drone_tile_url && f.properties.drone_tile_url.length > 20)
+                    );
+
+                    // USER REQUEST: Show exactly 20 (or max available)
+                    if (droneFeatures.length > 20) {
+                        droneFeatures = droneFeatures.slice(0, 20);
+                    }
+
+                    log(`✅ Loaded ${geojson.features.length} Parcels from DB`, 'normal');
+                    log(`🎯 Showing Exactly ${droneFeatures.length} Verified Drone Parcels (Green)`, 'success');
+
+                    updateStatus(`Showing ${droneFeatures.length} Drone Parcels`, 'success');
+
+                    // Create a new GeoJSON object with only these features
+                    const filteredGeoJSON = {
+                        type: "FeatureCollection",
+                        features: droneFeatures
+                    };
+
+                    L.geoJSON(filteredGeoJSON, {
+                        style: {
+                            color: "#00ff00", // Green
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.2
+                        },
+                        onEachFeature: (feature, layer) => {
+                            if (feature.properties) {
+                                layer.bindPopup(`
+                                    <b>ID:</b> ${feature.properties.id}<br>
+                                    <b>Farmer:</b> ${feature.properties.farmer_name}<br>
+                                    <b>Has Drone?</b> ${feature.properties.drone_survey}
+                                `);
+                            }
+
+                            // Click handler
+                            layer.on('click', () => {
+                                const url = feature.properties.drone_tile_url;
+                                const id = feature.properties.id;
+                                log(`🖱️ Clicked Parcel ID: ${id}`);
+                                if (url) {
+                                    loadDroneLayer(url);
+                                } else {
+                                    log('⚠️ No URL for this parcel', 'error');
+                                }
+                                // Center map
+                                map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 18 });
+                            });
+                        }
+                    }).addTo(map);
+
+                    // Zoom to all parcels
+                    if (layer.getBounds().isValid()) {
+                        map.fitBounds(layer.getBounds());
+                    }
+                }
+            } catch (e) {
+                log(e.message, 'error');
+            }
+        }
+
+        init();
+    </script>
+
+</body>
+
+</html>

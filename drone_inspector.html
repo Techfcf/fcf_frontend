@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Metadata Inspector</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        #controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-grow: 1;
+            margin-left: 30px;
+        }
+
+        #map {
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        select,
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        select {
+            background: white;
+            cursor: pointer;
+            min-width: 300px;
+        }
+
+        input {
+            min-width: 200px;
+        }
+
+        .stats {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .badge {
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div style="font-weight: bold; font-size: 1.2rem;">🛸 Drone Inspector</div>
+        <div id="controls">
+            <input type="text" id="search" placeholder="Filter folders...">
+            <select id="droneSelect">
+                <option value="">-- Loading 162+ datasets... --</option>
+            </select>
+            <div class="stats" id="info">Connect to backend to see metadata</div>
+            <div class="badge" id="loadedBadge">LOADED</div>
+        </div>
+    </header>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map', {
+            center: [20.9517, 85.0985],
+            zoom: 7
+        });
+
+        const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+            maxZoom: 22,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        let activeLayer = null;
+        let activeRectangle = null; // Added for red rectangle
+        let coverageData = [];
+
+        // Fetch coverage from backend
+        async function init() {
+            try {
+                const response = await fetch('http://localhost:5002/api/drone-coverage');
+                coverageData = await response.json();
+                console.log(`Loaded ${coverageData.length} records`);
+                document.getElementById('info').innerText = `Loaded ${coverageData.length} datasets from GCS`;
+                renderDropdown("");
+            } catch (err) {
+                console.error(err);
+                document.getElementById('info').innerText = "❌ Backend connection failed (Check if server is running on 5002)";
+            }
+        }
+
+        function renderDropdown(filter) {
+            const select = document.getElementById('droneSelect');
+            select.innerHTML = '<option value="">-- Select a drone dataset --</option>';
+
+            const filtered = coverageData.filter(item =>
+                item.folder.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filtered.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.folder;
+                option.textContent = item.folder.split('/').pop().replace(/_/g, ' ');
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderDropdown(e.target.value);
+        });
+
+        // Helper to parse XML bounding box and zoom levels
+        function parseXmlBoundingBox(xmlText, folder) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const bbox = xmlDoc.getElementsByTagName("BoundingBox")[0];
+
+                const minLng = parseFloat(bbox.getAttribute("minx"));
+                const minLat = parseFloat(bbox.getAttribute("miny"));
+                const maxLng = parseFloat(bbox.getAttribute("maxx"));
+                const maxLat = parseFloat(bbox.getAttribute("maxy"));
+
+                const tileSets = xmlDoc.getElementsByTagName("TileSet");
+                const zoomLevels = Array.from(tileSets).map(ts => parseInt(ts.getAttribute("order")));
+                const minZoom = Math.max(12, Math.min(...zoomLevels));
+                const maxZoom = Math.max(...zoomLevels);
+
+                return {
+                    folder,
+                    bounds: { minLat, minLng, maxLat, maxLng },
+                    minZoom,
+                    maxZoom
+                };
+            } catch (e) {
+                console.error("XML Parse Error:", e);
+                return null;
+            }
+        }
+
+        document.getElementById('droneSelect').addEventListener('change', async (e) => {
+            const folder = e.target.value;
+            if (!folder) return;
+
+            try {
+                document.getElementById('info').innerText = `📄 Fetching metadata for ${folder.split('/').pop()}...`;
+
+                // Fetch XML for the specific folder (XML LOGIC)
+                const xmlUrl = `http://localhost:5002/api/tiles/NbS-003/${folder}/tilemapresource.xml`;
+                const response = await fetch(xmlUrl);
+                if (!response.ok) throw new Error("Failed to fetch XML");
+
+                const xmlText = await response.text();
+                const item = parseXmlBoundingBox(xmlText, folder);
+
+                if (!item) throw new Error("Could not parse XML");
+
+                // Remove old layer and rectangle
+                if (activeLayer) map.removeLayer(activeLayer);
+                if (activeRectangle) map.removeLayer(activeRectangle);
+
+                // Add Tile Layer (SYNCED LOGIC: TMS=TRUE)
+                const tileUrl = `http://localhost:5002/api/tiles/NbS-003/${folder}/{z}/{x}/{y}.png`;
+
+                activeLayer = L.tileLayer(tileUrl, {
+                    maxZoom: item.maxZoom || 22,
+                    minZoom: item.minZoom || 12,
+                    tms: true, // Switched to true per user snippet
+                    opacity: 1
+                }).addTo(map);
+
+                // Zoom to bounds
+                const bounds = L.latLngBounds(
+                    [item.bounds.minLat, item.bounds.minLng],
+                    [item.bounds.maxLat, item.bounds.maxLng]
+                );
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 1 });
+
+                // Add Red Rectangle (SYNCED LOGIC: Red border, No fill)
+                activeRectangle = L.rectangle(bounds, {
+                    color: "#ff0000",
+                    weight: 1,
+                    fillOpacity: 0,
+                    fillColor: "#ff0000"
+                }).addTo(map);
+
+                document.getElementById('loadedBadge').style.display = 'block';
+                document.getElementById('info').innerText = `Showing: ${folder.split('/').pop()} (Zoom: ${item.minZoom}-${item.maxZoom})`;
+
+            } catch (err) {
+                console.error("Error loading drone patch:", err);
+                document.getElementById('info').innerText = `❌ Error: ${err.message}`;
+            }
+        });
+
+        init();
+    </script>
+
+</body>
+
+</html>

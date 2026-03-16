@@ -29,11 +29,11 @@ const FarmerDetailPanel = ({ farmer, onClose, activeDroneTileUrl, onDroneTileTog
     setError('');
 
     const detailsUrl = `${API_BASE_URL}/api/farmers/${encodeURIComponent(farmer.farmerId)}/details`;
-    // Use project_code for tree data since parcel_tree_data uses a different farmer_id format
-    const projectCode = farmer.project_code || '';
-    const parcelTreesUrl = projectCode
-      ? `${API_BASE_URL}/api/parcel-trees/project/${encodeURIComponent(projectCode)}`
-      : `${API_BASE_URL}/api/parcel-trees/farmer/${encodeURIComponent(farmer.farmerId)}`;
+    // Use parcel_id for precise tree inventory mapping
+    const parcelId = farmer.parcelId || '';
+    const parcelTreesUrl = parcelId
+      ? `${API_BASE_URL}/api/parcel-trees/parcel/${encodeURIComponent(parcelId)}`
+      : `${API_BASE_URL}/api/parcel-trees/project/${encodeURIComponent(farmer.project_code || '')}`;
 
     console.log('🔎 Fetching details URL:', detailsUrl);
     console.log('🌳 Fetching parcel trees URL:', parcelTreesUrl);

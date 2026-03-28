@@ -54,13 +54,7 @@ const Card3 = () => {
         {/* Right: Image */}
         <div className="dmrv-image">
           <img src="/img/demo1.png" alt="DMRV Platform Illustration" />
-          <div className="dmrv-image-badge">
-            <div className="dmrv-image-badge-icon">⚡</div>
-            <div>
-              <div className="dmrv-image-badge-label">Data accuracy</div>
-              <div className="dmrv-image-badge-value">99.2% verified</div>
-            </div>
-          </div>
+
         </div>
       </div>
     </section>

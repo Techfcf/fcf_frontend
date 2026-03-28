@@ -65,8 +65,17 @@ const Dashboard = () => {
     localStorage.setItem("selectedProjectCode", clickedProjectCode);
   }
 
+  // ⭐ Get user role and assigned project
+  const storedUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+  const userRole = storedUser?.role;
+  const userProjectId = storedUser?.project_id;
+
   const selectedProjectCode =
-    localStorage.getItem("selectedProjectCode") || "All";
+    userRole === "client"
+      ? "DEMO-001"
+      : userRole === "project_manager" && userProjectId
+      ? userProjectId
+      : localStorage.getItem("selectedProjectCode") || "All";
 
   // ⭐ Project name state
   const [projectName, setProjectName] = useState("");
@@ -137,6 +146,7 @@ const Dashboard = () => {
             selectedProjectCode={selectedProjectCode}
             onFilterChange={setCurrentFilters}
             onProjectNameChange={handleProjectNameChange}
+            userRole={userRole}
           />
 
           <MainContent>
@@ -146,6 +156,7 @@ const Dashboard = () => {
                 filters={currentFilters}
                 activeDroneTileUrl={activeDroneTileUrl}
                 setActiveDroneTileUrl={setActiveDroneTileUrl}
+                userRole={userRole}
               />
             </MapArea>
 

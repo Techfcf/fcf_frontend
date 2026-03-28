@@ -222,6 +222,55 @@
 }
 
 /* ============================================================
+   DEMO LOGIN SECTION
+============================================================ */
+.demo-login-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.demo-btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.demo-btn {
+  padding: 8px 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.demo-btn.admin:hover { border-color: #F59E0B; color: #F59E0B; }
+.demo-btn.pm:hover { border-color: #3DB968; color: #3DB968; }
+.demo-btn.client:hover { border-color: #60A5FA; color: #60A5FA; }
+
+/* ============================================================
    RESPONSIVE
 ============================================================ */
 @media (max-width: 480px) {

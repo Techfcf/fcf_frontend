@@ -37,7 +37,7 @@ const Card1 = () => {
 
   // ── TOP NAVBAR ──
   const [scrolled, setScrolled] = React.useState(false);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -71,7 +71,7 @@ const Card1 = () => {
           </button>
           <button
             className="landing-nav-link landing-nav-cta"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/login", { state: { intendedRole: "client" } })}
           >
             Login →
           </button>
@@ -99,7 +99,10 @@ const Card1 = () => {
           <button className="btn-hero-primary" onClick={scrollToProjects}>
             Explore Projects
           </button>
-          <button className="btn-hero-secondary" onClick={() => navigate("/login")}>
+          <button className="btn-hero-secondary" onClick={() => {
+            localStorage.setItem("selectedProjectCode", "All");
+            navigate("/login", { state: { intendedRole: "admin" } });
+          }}>
             Access Dashboard
           </button>
         </div>
@@ -125,11 +128,6 @@ const Card1 = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="scroll-indicator">
-        <span>Scroll</span>
-        <div className="scroll-line" />
-      </div>
     </section>
   );
 };

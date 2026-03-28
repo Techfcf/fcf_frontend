@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import "../../src/Style/FilterSection.css";
 import { API_BASE_URL } from "../config";
+import clientData from "../data/clientDemoData.json";
 
-const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChange }) => {
+const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChange, userRole }) => {
 
   const [farmers, setFarmers] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -31,13 +32,15 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
 
   // LOAD PROJECT LIST FOR NAME MATCH
   useEffect(() => {
+    if (userRole === "client") {
+      setProjects([clientData.project]);
+      return;
+    }
     fetch(`${API_BASE_URL}/api/projects`)
       .then((res) => res.json())
-      .then((data) => {
-        setProjects(data.filter(p => p.project_id !== 'F4F'));
-      })
+      .then((data) => setProjects(data))
       .catch((err) => console.error("Projects API Error:", err));
-  }, []);
+  }, [userRole]);
 
   // WHEN PROJECT CODE COMES FROM OUTSIDE (DROPDOWN)
   useEffect(() => {
@@ -66,13 +69,17 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
 
   // LOAD FARMERS LIST
   useEffect(() => {
+    if (userRole === "client") {
+      setFarmers(clientData.farmers);
+      return;
+    }
     let url = `${API_BASE_URL}/api/farmers`;
 
     fetch(url)
       .then((res) => res.json())
       .then((data) => setFarmers(data))
       .catch((err) => console.error("Farmers API Error:", err));
-  }, [filters.project_code]);
+  }, [filters.project_code, userRole]);
 
 
   // GET UNIQUE FILTER LISTS
@@ -103,6 +110,25 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
       return;
     }
 
+    if (userRole === "client") {
+      let filtered = clientData.farmers;
+      const checks = ["state", "district", "blocks", "grampanchayat", "village"];
+      checks.forEach(k => {
+        if (filters[k] && filters[k] !== "All") {
+          filtered = filtered.filter(f => f[k] === filters[k]);
+        }
+      });
+      const tArea = filtered.reduce((sum, f) => sum + parseFloat(f.area_ha || 0), 0);
+      const tAcres = filtered.reduce((sum, f) => sum + parseFloat(f.area_acres || 0), 0);
+      setTotals({
+        total_farmers: filtered.length,
+        total_parcels: filtered.length,
+        total_area_ha: tArea,
+        total_area_acres: tAcres
+      });
+      return;
+    }
+
     const query = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== "All") query.append(key, value);
@@ -128,7 +154,7 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
       })
       .catch(() => setTotalsError("Failed to load totals"))
       .finally(() => setTotalsLoading(false));
-  }, [filters]);
+  }, [filters, userRole]);
 
 
   // HANDLE FILTER CHANGE
@@ -198,9 +224,9 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
 
       <div className="filter-row">
 
-        {/* PROJECT CODE */}
         <div className="filter-item">
           <motion.select
+            disabled={JSON.parse(localStorage.getItem("auth_user") || "{}")?.role === "project_manager"}
             className="filter-select"
             value={filters.project_code}
             whileHover={{ scale: 1.02 }}

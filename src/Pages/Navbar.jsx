@@ -24,6 +24,7 @@ const Navbar = ({ projectName }) => {
   })();
 
   const userEmail = storedUser?.email || storedUser?.username || '';
+  const userRole = storedUser?.role || 'Guest';
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
   const initials = displayName.substring(0, 2).toUpperCase();
 
@@ -49,7 +50,9 @@ const Navbar = ({ projectName }) => {
           <div className="nav-user-avatar">{initials}</div>
           <div className="nav-user-info">
             <span className="nav-user-welcome">Welcome back,</span>
-            <span className="nav-user-name">{displayName} 👋</span>
+            <span className="nav-user-name">
+              {displayName} 👋 <span className="nav-user-role">({userRole})</span>
+            </span>
           </div>
         </div>
 

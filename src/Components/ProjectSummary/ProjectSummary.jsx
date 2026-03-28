@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../../Style/ProjectSummary.css";
+import { API_BASE_URL } from "../../config";
 
 const ProjectSummary = () => {
   const [project, setProject] = useState(null);
@@ -8,7 +9,7 @@ const ProjectSummary = () => {
   const selectedProjectCode = localStorage.getItem("selectedProjectCode");
 
   useEffect(() => {
-    fetch("https://mrv-backend-13977221722.asia-south1.run.app/api/projects")
+    fetch(`${API_BASE_URL}/api/projects`)
       .then((res) => res.json())
       .then((data) => {
         const found = data.find((p) => p.project_id === selectedProjectCode);

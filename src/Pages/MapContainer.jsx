@@ -7,11 +7,12 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 import "../../src/Style/FilterSection.css";
 import { API_BASE_URL } from "../config";
+import clientData from "../data/clientDemoData.json";
 
 // --- HIERARCHY DEFINITION ---
 const HIERARCHY_LEVELS = ["state", "district", "block", "grampanchayat", "village", "parcel"];
 
-const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDroneTileUrl }) => {
+const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDroneTileUrl, userRole }) => {
   const [map, setMap] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null); // Store ALL fetched data
 
@@ -176,6 +177,36 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
       return;
     }
 
+    if (userRole === "client") {
+      let filtered = clientData.farmers;
+      const checks = ["state", "district", "blocks", "grampanchayat", "village"];
+      checks.forEach(k => {
+        if (filters[k] && filters[k] !== "All") {
+          filtered = filtered.filter(f => f[k] === filters[k]);
+        }
+      });
+
+      const mockGeoJson = {
+        type: "FeatureCollection",
+        features: filtered.map(f => ({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[
+              [f.lng - 0.0005, f.lat - 0.0005],
+              [f.lng + 0.0005, f.lat - 0.0005],
+              [f.lng + 0.0005, f.lat + 0.0005],
+              [f.lng - 0.0005, f.lat + 0.0005],
+              [f.lng - 0.0005, f.lat - 0.0005]
+            ]]
+          },
+          properties: { ...f, drone_survey: "No" }
+        }))
+      };
+      setGeoJsonData(mockGeoJson);
+      return;
+    }
+
     const apiUrl = `${API_BASE_URL}/api/farmers-with-land?${queryParams}`;
 
     fetch(apiUrl)
@@ -186,7 +217,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
       })
       .catch(console.error);
 
-  }, [filters, map]);
+  }, [filters, map, userRole]);
 
   // --- RENDER CLUSTERS AND POLYGONS ---
   useEffect(() => {
@@ -272,6 +303,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
               areaHa: p.area_ha, areaAcres: p.area_ha ? Number(p.area_ha) * 2.47105 : undefined,
               drone_survey: p.drone_survey, drone_image_url: p.drone_image_url,
               drone_tile_url: dynamicTileUrl,
+              plantation_year: p.plantation_year,
             });
           }
         });
@@ -297,6 +329,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
               areaHa: p.area_ha, areaAcres: p.area_ha ? Number(p.area_ha) * 2.47105 : undefined,
               drone_survey: p.drone_survey, drone_image_url: p.drone_image_url,
               drone_tile_url: dynamicTileUrl,
+              plantation_year: p.plantation_year,
             });
           }
         });

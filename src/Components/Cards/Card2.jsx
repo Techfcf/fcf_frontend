@@ -138,6 +138,7 @@ const Card2 = () => {
                   sidebarSelected: "projects",
                   projectName: project.name,
                   projectCode: project.id,
+                  intendedRole: "project_manager",
                 };
                 if (isAuthenticated) {
                   navigate("/dashboard", { state: payload });

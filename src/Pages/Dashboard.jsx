@@ -9,6 +9,7 @@ import MapContainer from "./MapContainer";
 import FarmerDetailPanel from "./FarmerDetailPanel";
 import ProjectSummary from "../Components/ProjectSummary/ProjectSummary";
 
+/* ── Layout shell ─────────────────────────────────────────── */
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -18,18 +19,18 @@ const AppContainer = styled.div`
   overflow: hidden;
 `;
 
+const MainRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+`;
+
 const ContentArea = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f5f7fa;
-  overflow: hidden;
-`;
-
-const MainLayout = styled.div`
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  flex: 1;
+  background: #fdfcfb;
   overflow: hidden;
 `;
 
@@ -38,34 +39,31 @@ const MainContent = styled.div`
   position: relative;
   display: flex;
   flex-direction: row;
-  height: calc(100vh - 64px - 74px);
   overflow: hidden;
 `;
 
 const MapArea = styled.div`
-  flex: ${({ $panelOpen }) => ($panelOpen ? "0 0 calc(100% - 400px)" : "1 1 100%")};
+  flex: ${({ $open }) => ($open ? "0 0 calc(100% - 400px)" : "1 1 100%")};
   transition: flex-basis 0.4s ease;
   min-width: 0;
 `;
 
 const PanelArea = styled.div`
-  width: ${({ $panelOpen }) => ($panelOpen ? "400px" : "0")};
+  width: ${({ $open }) => ($open ? "400px" : "0")};
   transition: width 0.4s ease;
   overflow: visible;
 `;
 
+/* ── Dashboard ────────────────────────────────────────────── */
 const Dashboard = () => {
   const location = useLocation();
-
   const isProjectSummary = location.pathname === "/ProjectSummary";
   const clickedProjectCode = location.state?.projectCode;
 
-  // ⭐ Save project code from click if present
   if (clickedProjectCode) {
     localStorage.setItem("selectedProjectCode", clickedProjectCode);
   }
 
-  // ⭐ Get user role and assigned project
   const storedUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
   const userRole = storedUser?.role;
   const userProjectId = storedUser?.project_id;
@@ -77,28 +75,22 @@ const Dashboard = () => {
       ? userProjectId
       : localStorage.getItem("selectedProjectCode") || "All";
 
-  // ⭐ Project name state
   const [projectName, setProjectName] = useState("");
 
-  // ⭐ Load projectMap from localStorage and set projectName
   useEffect(() => {
     try {
-      const storedMap = JSON.parse(localStorage.getItem("projectMap") || "{}");
-      if (storedMap[selectedProjectCode]) {
-        setProjectName(storedMap[selectedProjectCode]);
-      }
-    } catch (e) { console.error("Error parsing projectMap:", e); }
+      const m = JSON.parse(localStorage.getItem("projectMap") || "{}");
+      if (m[selectedProjectCode]) setProjectName(m[selectedProjectCode]);
+    } catch {}
   }, [selectedProjectCode]);
 
-  // ⭐ Handle project name coming from FilterSection
   const handleProjectNameChange = (name) => {
     setProjectName(name);
-
     try {
-      const pMap = JSON.parse(localStorage.getItem("projectMap") || "{}");
-      pMap[selectedProjectCode] = name;
-      localStorage.setItem("projectMap", JSON.stringify(pMap));
-    } catch (e) {
+      const m = JSON.parse(localStorage.getItem("projectMap") || "{}");
+      m[selectedProjectCode] = name;
+      localStorage.setItem("projectMap", JSON.stringify(m));
+    } catch {
       localStorage.setItem("projectMap", JSON.stringify({ [selectedProjectCode]: name }));
     }
   };
@@ -108,39 +100,30 @@ const Dashboard = () => {
   const [currentFilters, setCurrentFilters] = useState({});
   const panelOpen = Boolean(selectedFarmer);
 
-  // Clear drone tile when farmer or filters change
-  useEffect(() => {
-    setActiveDroneTileUrl(null);
-  }, [currentFilters, selectedFarmer?.farmerId]);
+  useEffect(() => { setActiveDroneTileUrl(null); }, [currentFilters, selectedFarmer?.farmerId]);
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-
-  // Project Summary Page
+  /* ── Project Summary ────────────────────────────────── */
   if (isProjectSummary) {
     return (
       <AppContainer>
-        <Navbar projectName={projectName} /> {/* ✅ Always show project name */}
-        <MainLayout>
+        <Navbar projectName={projectName} />
+        <MainRow>
           <Sidebar />
-          <div style={{ overflow: "auto", padding: "20px" }}>
+          <ContentArea style={{ padding: "20px", overflow: "auto" }}>
             <ProjectSummary />
-          </div>
-        </MainLayout>
+          </ContentArea>
+        </MainRow>
       </AppContainer>
     );
   }
 
-  // Dashboard Page
+  /* ── Main Dashboard ─────────────────────────────────── */
   return (
     <AppContainer>
       <Navbar projectName={projectName} />
-
-      <MainLayout>
+      <MainRow>
         <Sidebar />
-
         <ContentArea>
           <FilterSection
             selectedProjectCode={selectedProjectCode}
@@ -148,9 +131,8 @@ const Dashboard = () => {
             onProjectNameChange={handleProjectNameChange}
             userRole={userRole}
           />
-
           <MainContent>
-            <MapArea $panelOpen={panelOpen}>
+            <MapArea $open={panelOpen}>
               <MapContainer
                 onParcelSelect={setSelectedFarmer}
                 filters={currentFilters}
@@ -159,8 +141,7 @@ const Dashboard = () => {
                 userRole={userRole}
               />
             </MapArea>
-
-            <PanelArea $panelOpen={panelOpen}>
+            <PanelArea $open={panelOpen}>
               <FarmerDetailPanel
                 farmer={selectedFarmer}
                 onClose={() => setSelectedFarmer(null)}
@@ -170,7 +151,7 @@ const Dashboard = () => {
             </PanelArea>
           </MainContent>
         </ContentArea>
-      </MainLayout>
+      </MainRow>
     </AppContainer>
   );
 };

@@ -35,9 +35,9 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 1px 0 rgba(26,92,45,0.1), 0 2px 12px rgba(13,31,19,0.06);
-  z-index: 1000;
-  position: fixed;
-  top: 0; left: 0; right: 0;
+  z-index: 100;
+  position: relative;
+  flex-shrink: 0;
   height: 64px;
   border-bottom: 1px solid var(--fc-border);
 }
@@ -308,7 +308,7 @@
   position: absolute;
   top: 0; right: 0;
   width: 400px; height: 100%;
-  background: var(--fc-white);
+  background: #F5E6D3;
   box-shadow: -8px 0 32px rgba(13,31,19,0.12);
   z-index: 2000;
   border-left: 1px solid var(--fc-border);
@@ -323,7 +323,7 @@
   justify-content: space-between;
   padding: 14px 18px;
   border-bottom: 1px solid var(--fc-border);
-  background: var(--fc-surface);
+  background: rgba(26, 92, 45, 0.05); /* Slight tint for header */
 }
 
 .panel-title {

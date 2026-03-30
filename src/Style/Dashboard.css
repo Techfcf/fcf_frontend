@@ -1,0 +1,94 @@
+/* =========================
+   MAIN APP
+========================= */
+
+.dashboard-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+
+  outline: 2px solid red; /* debug */
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  flex: 1;
+  overflow: hidden;
+
+  outline: 2px solid green;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+  overflow: hidden;
+
+  outline: 2px solid blue;
+}
+
+/* =========================
+   MAIN AREA
+========================= */
+
+.dashboard-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+
+  outline: 2px solid purple;
+}
+
+/* =========================
+   MAP
+========================= */
+
+.dashboard-map {
+  flex: 1;
+  min-width: 0;
+  transition: flex 0.4s ease;
+
+  outline: 2px solid orange;
+}
+
+.dashboard-map.panel-open {
+  flex: 0 0 calc(100% - 500px);
+}
+
+/* =========================
+   PANEL
+========================= */
+
+.dashboard-panel {
+  width: 0;
+  transition: width 0.4s ease;
+  overflow: hidden;
+
+  outline: 2px solid brown;
+}
+
+.dashboard-panel.panel-open {
+  width: 400px;
+}
+
+/* =========================
+   SUMMARY PAGE
+========================= */
+
+.dashboard-summary {
+  overflow: auto;
+  padding: 20px;
+
+  outline: 2px solid teal;
+}

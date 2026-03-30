@@ -14,6 +14,38 @@ import Login from "../Pages/Login";
 import DroneExplorer from "../Pages/DroneExplorer";
 
 import ProtectedRoute from "../Auth/ProtectedRoute";
+import BiodiversityDashboard from "../Components/Darukaa/BiodiversityDashboard";
+import ClimateDashboard from "../Components/Darukaa/ClimateDashboard";
+
+import styled from "styled-components";
+
+// ── Shared full-screen shell for BD/CD pages ────────────────
+const Shell = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+`;
+const ShellRow = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+`;
+const ShellContent = styled.div`
+  flex: 1;
+  overflow: auto;
+`;
+
+const ShellLayout = ({ children }) => (
+  <Shell>
+    <Navbar />
+    <ShellRow>
+      <Sidebar />
+      <ShellContent>{children}</ShellContent>
+    </ShellRow>
+  </Shell>
+);
 
 const AppRoutes = () => {
   return (
@@ -25,92 +57,36 @@ const AppRoutes = () => {
         <Route path="/drone-explorer" element={<DroneExplorer />} />
 
         {/* 🔐 Protected */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/project/:projectId" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/ProjectSummary" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+        <Route path="/Navbar" element={<ProtectedRoute><Navbar /></ProtectedRoute>} />
+        <Route path="/MapContainer" element={<ProtectedRoute><MapContainer /></ProtectedRoute>} />
+        <Route path="/Sidebar" element={<ProtectedRoute><Sidebar /></ProtectedRoute>} />
+        <Route path="/FarmerDetailPanel" element={<ProtectedRoute><FarmerDetailPanel /></ProtectedRoute>} />
+        <Route path="/FilterSection" element={<ProtectedRoute><FilterSection /></ProtectedRoute>} />
+        <Route path="/FloatingResults" element={<ProtectedRoute><FloatingResults /></ProtectedRoute>} />
+        <Route path="/Help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+
+        {/* 🌿 Darukaa — wrapped in shared Navbar + Sidebar shell */}
         <Route
-          path="/dashboard"
+          path="/BiodiversityDashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ShellLayout>
+                <BiodiversityDashboard />
+              </ShellLayout>
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/project/:projectId"
+          path="/ClimateDashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/ProjectSummary"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/Navbar"
-          element={
-            <ProtectedRoute>
-              <Navbar />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/MapContainer"
-          element={
-            <ProtectedRoute>
-              <MapContainer />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/Sidebar"
-          element={
-            <ProtectedRoute>
-              <Sidebar />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/FarmerDetailPanel"
-          element={
-            <ProtectedRoute>
-              <FarmerDetailPanel />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/FilterSection"
-          element={
-            <ProtectedRoute>
-              <FilterSection />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/FloatingResults"
-          element={
-            <ProtectedRoute>
-              <FloatingResults />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/Help"
-          element={
-            <ProtectedRoute>
-              <Help />
+              <ShellLayout>
+                <ClimateDashboard />
+              </ShellLayout>
             </ProtectedRoute>
           }
         />

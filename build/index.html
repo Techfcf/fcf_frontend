@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fit-Climate</title>
+  <script type="module" crossorigin src="./assets/index-B35QPR01.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Nu1w9zSy.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    // Suppress 404 errors for drone tiles (expected for tiles outside coverage area)
+    window.addEventListener('error', function (e) {
+      if (e.target && e.target.tagName === 'IMG' && e.target.src && e.target.src.includes('/api/tiles/NbS-003/')) {
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+
+    // Also suppress console errors for failed tile loads
+    const originalConsoleError = console.error;
+    console.error = function (...args) {
+      const errorString = args.join(' ');
+      if (errorString.includes('/api/tiles/NbS-003/') || errorString.includes('404')) {
+        return; // Suppress
+      }
+      originalConsoleError.apply(console, args);
+    };
+  </script>
+</body>
+
+</html>

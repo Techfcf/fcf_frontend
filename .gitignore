@@ -13,8 +13,8 @@ lerna-debug.log*
 .pnp.js
 
 # Build output
-/dist/
-/build/
+# /dist/
+# /build/
 
 # Editor directories and files
 .vscode/*

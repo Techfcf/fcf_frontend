@@ -9,6 +9,7 @@ import {
   createSitePopupContent,
   getBiodiversitySummary,
 } from "../../api/DarukaaBiodivesitySitesApi";
+import { getWaterBodiesByType } from "../../api/WaterBodyApi";
 
 import {
   Tooltip,
@@ -43,6 +44,10 @@ const BiodiversityDashboard = () => {
   // Species Activity Trend States
   const [selectedSpeciesSiteIndex, setSelectedSpeciesSiteIndex] = useState(0);
   const [selectedSpeciesFilter, setSelectedSpeciesFilter] = useState("All");
+
+  // Water Bodies States
+  const [selectedWaterBodyType, setSelectedWaterBodyType] = useState(null); // 'BWA', 'DAM', 'LIFT', 'hydroLakes'
+  const waterBodyLayerRef = useRef(null);
 
   const sidebarWidth = sidebarExpanded ? "200px" : "64px";
 
@@ -157,6 +162,73 @@ const BiodiversityDashboard = () => {
     fetchAll();
     return () => controller.abort();
   }, []);
+
+  // ====================== WATER BODIES LAYER ======================
+  useEffect(() => {
+    if (!leafletMap.current || !window.L) return;
+    const map = leafletMap.current;
+
+    const fetchAndRenderWaterBodies = async () => {
+      // Clear existing layer
+      if (waterBodyLayerRef.current) {
+        map.removeLayer(waterBodyLayerRef.current);
+        waterBodyLayerRef.current = null;
+      }
+
+      if (!selectedWaterBodyType) return;
+
+      try {
+        const data = await getWaterBodiesByType(selectedWaterBodyType);
+        if (!data || data.length === 0) return;
+
+        const layer = window.L.geoJSON(data.map(item => ({
+          type: "Feature",
+          properties: item,
+          geometry: item.geometry
+        })), {
+          style: (feature) => ({
+            color: "#3498db",
+            weight: 2,
+            fillOpacity: 0.5,
+            fillColor: "#3498db"
+          }),
+          pointToLayer: (feature, latlng) => {
+             return window.L.circleMarker(latlng, {
+                radius: 6,
+                fillColor: "#3498db",
+                color: "#fff",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+             });
+          },
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            layer.bindPopup(`
+              <div style="font-family: inherit;">
+                <b style="color:#d66306">${props.type || "Water Body"}</b><br/>
+                <b>Name:</b> ${props.name || "N/A"}<br/>
+                <b>River:</b> ${props.river || "N/A"}<br/>
+                <b>District:</b> ${props.district || "N/A"}, ${props.state || ""}<br/>
+                ${props.additional_attributes ? `<small>${JSON.stringify(props.additional_attributes)}</small>` : ""}
+              </div>
+            `);
+          }
+        }).addTo(map);
+
+        waterBodyLayerRef.current = layer;
+        
+        // Fit map to layer if features exist
+        if (data.length > 0) {
+           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+        }
+      } catch (err) {
+        console.error("Error rendering water bodies:", err);
+      }
+    };
+
+    fetchAndRenderWaterBodies();
+  }, [selectedWaterBodyType]);
 
   // ====================== COMBINED SITES ======================
   const combinedSites = useMemo(() => {
@@ -298,6 +370,34 @@ const BiodiversityDashboard = () => {
     <div className="biodiversity">
       <div className="biodiversity-map-layout">
         <div className="biodiversity-map-wrapper">
+          {/* Water Bodies Floating Filters */}
+          <div className="wb-floating-filters">
+            <div className="wb-filter-header">Water Bodies</div>
+            <div className="wb-filter-options">
+               {[
+                 { id: 'BWA', label: 'BWA' },
+                 { id: 'DAM', label: 'DAM' },
+                 { id: 'LIFT', label: 'LIFT' },
+                 { id: 'hydroLakes', label: 'HydroLakes' }
+               ].map(opt => (
+                 <label key={opt.id} className="wb-radio-label">
+                   <input 
+                     type="radio" 
+                     name="wbType" 
+                     checked={selectedWaterBodyType === opt.id}
+                     onChange={() => setSelectedWaterBodyType(opt.id)}
+                     onClick={() => {
+                        if(selectedWaterBodyType === opt.id) setSelectedWaterBodyType(null);
+                     }}
+                   />
+                   <span>{opt.label}</span>
+                 </label>
+               ))}
+               {selectedWaterBodyType && (
+                 <button className="wb-clear-btn" onClick={() => setSelectedWaterBodyType(null)}>Clear</button>
+               )}
+            </div>
+          </div>
           <div className="bd-content">
             {/* ── MAP ── */}
             <div className="bd-map-card">

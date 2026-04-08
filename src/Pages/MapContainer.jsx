@@ -528,7 +528,8 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
       'DAM': '#ff8c00',
       'LIFT': '#9932cc',
       'hydroLakes': '#20b2aa',
-      'prasari': '#ff1493'
+      'prasari': '#ff1493',
+      'dumka': '#ffff00' // Yellow for Nearest Waterbodies
     };
 
     const linesLayer = L.layerGroup();
@@ -577,10 +578,9 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
       typesFound.forEach(type => {
         const targetWb = nearestPerType[type];
         const line = L.polyline([parcelLatLng, targetWb.latlng], {
-          color: wbColors[type] || '#3498db',    // Match line color to the specific waterbody type
+          color: '#ffff00',    // Solid Yellow color for the line
           weight: 2,           // Thickness
-          dashArray: '5, 8',   // 5px line, 8px gap for a dotted line feel
-          opacity: 0.8
+          opacity: 0.9
         }).addTo(linesLayer);
 
         // Allow clicking the line itself to show the parcel's tooltip as well
@@ -595,9 +595,8 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
         const formatDistance = (m) => m < 1000 ? Math.round(m) + " m" : (m / 1000).toFixed(1) + " km";
 
         const labelHtml = typesFound.map(type => {
-          const color = wbColors[type] || '#3498db';
           const distText = formatDistance(nearestPerType[type].dist);
-          return `<span style="color:${color}; padding:0 1px;">${distText}</span>`;
+          return `<span style="color:#ff0000; padding:0 1px;">${distText}</span>`;
         }).join('<span style="color:#9CA3AF; font-weight:normal; margin: 0 3px;">|</span>');
 
         L.tooltip({

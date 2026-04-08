@@ -268,9 +268,9 @@ const FarmerDetailPanel = ({ farmer, onClose, activeDroneTileUrl, onDroneTileTog
                     }}>
                       <div className="grid-details" style={{ fontSize: 12 }}>
                         {[
-                          ['Species ID', pt.species_id],
+
                           ['Species Name', pt.species_name],
-                          ['Scientific Name', pt.species_scientific_name],
+
                           ['Count', pt.count],
                           ['Plantation Year', pt.plantation_year],
                         ].map(([label, value], i) => (

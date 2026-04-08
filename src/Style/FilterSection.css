@@ -182,3 +182,105 @@
   .filter-item.reset-item { align-self: flex-start; padding-bottom: 0; }
   .totals-row { flex-direction: column; }
 }
+
+/* ============================================================
+   WATER BODIES FLOATING FILTERS (MAIN DASHBOARD)
+============================================================ */
+.wb-floating-filters {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.15); /* Maximum transparency */
+  backdrop-filter: blur(16px);          /* Strong blur for legibility */
+  -webkit-backdrop-filter: blur(16px);
+  padding: 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-width: 175px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wb-floating-filters:hover {
+  background: rgba(255, 255, 255, 0.25); /* Subtle lift on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.wb-filter-header {
+  font-weight: 700;
+  color: #d66306;
+  margin-bottom: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.wb-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wb-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #3A5245;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding: 4px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 6px;
+}
+
+.wb-color-block {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.wb-check-label:hover {
+  background: #ffffff;
+  transform: translateX(4px);
+}
+
+.wb-check-label input {
+  cursor: pointer;
+  accent-color: #d66306;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+
+.wb-clear-btn {
+  margin-top: 10px;
+  padding: 6px 10px;
+  font-size: 11px;
+  background: #ffffff;
+  border: 1px solid rgba(214, 99, 6, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  color: #d66306;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wb-clear-btn:hover {
+  background: #FEF3C7;
+  border-color: #d66306;
+}
+
+.main-map-filters {
+  top: 20px;
+  right: 20px;
+}

@@ -80,6 +80,7 @@ const FilterSection = ({ onFilterChange, selectedProjectCode, onProjectNameChang
       .then((data) => setFarmers(data))
       .catch((err) => console.error("Farmers API Error:", err));
   }, [filters.project_code, userRole]);
+  
 
 
   // GET UNIQUE FILTER LISTS

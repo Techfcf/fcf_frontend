@@ -424,7 +424,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
       'LIFT': '#9932cc',       // Dark Orchid
       'hydroLakes': '#20b2aa', // Light Sea Green
       'prasari': '#ff1493',    // Deep Pink
-      'dumka': '#ff4500'       // Orange Red
+      'dumka': '#1e90ff'       // Dodger Blue
     };
 
     const fetchAndRenderWaterBodies = async () => {
@@ -690,12 +690,12 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
         {isWbMenuOpen && (
           <div className="wb-filter-options">
             {[
-              { id: 'BWA', label: 'BWA', color: '#1e90ff' },
-              { id: 'DAM', label: 'DAM', color: '#ff8c00' },
-              { id: 'LIFT', label: 'LIFT', color: '#9932cc' },
-              { id: 'hydroLakes', label: 'HydroLakes', color: '#20b2aa' },
-              { id: 'prasari', label: 'Prasari', color: '#ff1493' },
-              { id: 'dumka', label: 'Nearest Waterbodies', color: '#ff4500' }
+              //{ id: 'BWA', label: 'BWA', color: '#1e90ff' },
+              //{ id: 'DAM', label: 'DAM', color: '#ff8c00' },
+              //{ id: 'LIFT', label: 'LIFT', color: '#9932cc' },
+              //{ id: 'hydroLakes', label: 'HydroLakes', color: '#20b2aa' },
+              //{ id: 'prasari', label: 'Prasari', color: '#ff1493' },
+              { id: 'dumka', label: 'Nearest Waterbodies', color: '#1e90ff' }
             ].map(opt => (
               <label key={opt.id} className="wb-check-label">
                 <span className="wb-color-block" style={{ backgroundColor: opt.color }}></span>

@@ -466,7 +466,7 @@ const MapContainer = ({ filters, onParcelSelect, activeDroneTileUrl, setActiveDr
             return {
               color: color,
               weight: 2,
-              fillOpacity: 0.5,
+              fillOpacity: 0,
               fillColor: color
             };
           },
